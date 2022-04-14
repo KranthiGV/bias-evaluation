@@ -1,5 +1,5 @@
 # Frequently used
-* `conda activate bias`
+* `conda activate bias-(cpu/gpu)`
 
 # Miscellaneous
-* `conda env export | grep -v "^prefix: " > environment.yml`
+* `conda env export | grep -v "^prefix: " > environment-(cpu/gpu).yml`
