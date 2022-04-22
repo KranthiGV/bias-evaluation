@@ -7,3 +7,6 @@
 
 #### Saving Changes
 - `conda env export -n bias-(cpu/gpu).yml -f environment-(cpu/gpu).yml --no-builds`
+
+### Issues Observed
+- Had to clean build info from env files. If it happens again. Follow --> https://stackoverflow.com/a/56780297/3712270
