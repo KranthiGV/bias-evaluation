@@ -1,3 +1,8 @@
+## Test CrowS-Pairs Dataset
+- `git clone git@github.com:nyu-mll/crows-pairs.git`
+- `pip3 install -r ./crows-pairs/requirements.txt`
+- `python3 ./crows-pairs/metric.py --input_file ./crows-pairs/data/crows_pairs_anonymized.csv --lm_model bert --output_file crows-pairs-bert-temp-opt`
+
 ## Test StereoSet Dataset
 - `wget 'https://raw.githubusercontent.com/moinnadeem/StereoSet/master/data/dev.json'`
 - `wget 'https://raw.githubusercontent.com/moinnadeem/StereoSet/master/code/evaluation.py'`
