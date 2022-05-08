@@ -12,6 +12,9 @@ import pandas as pd
 from transformers import BertTokenizer, BertForMaskedLM
 from transformers import AlbertTokenizer, AlbertForMaskedLM
 from transformers import RobertaTokenizer, RobertaForMaskedLM
+from transformers import DebertaTokenizer, DebertaForMaskedLM
+from transformers import DistilBertTokenizer, DistilBertForMaskedLM
+from transformers import ElectraTokenizer, ElectraForMaskedLM
 from collections import defaultdict
 from tqdm import tqdm
 
@@ -184,6 +187,22 @@ def evaluate(args):
     elif args.lm_model == "albert":
         tokenizer = AlbertTokenizer.from_pretrained('albert-xxlarge-v2')
         model = AlbertForMaskedLM.from_pretrained('albert-xxlarge-v2')
+        uncased = True
+    elif args.lm_model == "deberta":
+        tokenizer = DebertaTokenizer.from_pretrained('microsoft/deberta-base')
+        model = DebertaForMaskedLM.from_pretrained('microsoft/deberta-base')
+        uncased = False
+    elif args.lm_model == "debertav3":
+        tokenizer = DebertaTokenizer.from_pretrained('microsoft/deberta-v3-base')
+        model = DebertaForMaskedLM.from_pretrained('microsoft/deberta-v3-base')
+        uncased = False
+    elif args.lm_model == "distilbert":
+        tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
+        model = DistilBertForMaskedLM.from_pretrained('distilbert-base-uncased')
+        uncased = True
+    elif args.lm_model == "electra":
+        tokenizer = ElectraTokenizer.from_pretrained('google/electra-large-discriminator')
+        model = ElectraForMaskedLM.from_pretrained('google/electra-large-discriminator')
         uncased = True
 
     model.eval()
