@@ -1,0 +1,3 @@
+[submodule "src/stereoset/nsp-trainer"]
+	path = src/stereoset/nsp-trainer
+	url = git@github.com:swappysh/nsp-trainer.git
