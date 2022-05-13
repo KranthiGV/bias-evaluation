@@ -1,12 +1,12 @@
 ''' Convenience functions for handling BERT '''
 import torch
-import pytorch_pretrained_bert as bert
+from transformers import BertTokenizer, BertModel
 
 
 def load_model(version='bert-large-uncased'):
     ''' Load BERT model and corresponding tokenizer '''
-    tokenizer = bert.BertTokenizer.from_pretrained(version)
-    model = bert.BertModel.from_pretrained(version)
+    tokenizer = BertTokenizer.from_pretrained(version)
+    model = BertModel.from_pretrained(version)
     model.eval()
 
     return model, tokenizer
@@ -21,7 +21,8 @@ def encode(model, tokenizer, texts):
         segment_idxs = [0] * len(tokenized)
         tokens_tensor = torch.tensor([indexed])
         segments_tensor = torch.tensor([segment_idxs])
-        enc, _ = model(tokens_tensor, segments_tensor, output_all_encoded_layers=False)
+        outputs = model(tokens_tensor, segments_tensor, output_hidden_states=False)
+        enc = outputs['last_hidden_state']
 
         enc = enc[:, 0, :]  # extract the last rep of the first input
         encs[text] = enc.detach().view(-1).numpy()
