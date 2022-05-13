@@ -42,6 +42,10 @@ import torch.nn.functional as F
 from torch.utils.data.dataloader import DataLoader
 import tqdm.notebook as tqdm
 from collections import defaultdict, Counter
+from argparse import ArgumentParser
+import sys
+sys.path.append('./nsp-trainer/models')
+import models
 
 DEVICE = torch.device("cuda:0")
 # DEVICE = torch.device("cpu")
@@ -190,10 +194,22 @@ args = ArgumentParser()
 args.add_argument("--saved-model", default=None)
 args = args.parse_args()
 
-encoder = transformers.DebertaModel.from_pretrained("microsoft/deberta-base")
+encoder = models.ModelNSP("microsoft/deberta-base")
+print("Loading: ", args.saved_model)
 sd = torch.load(args.saved_model, map_location=DEVICE)
+#newsd = {}
+#for k, v in sd.items():
+#    if len(k.partition('module.')) > 2:
+#        newsd[k.partition('module.')[2]] = v
+#    else:
+#        print("cry: ", k.partition('module.'))
+#        break
+sd = {(k.partition('module.')[2] if len(k.partition('module.')) > 2 else k): v for k,v in sd.items()}
+#sd = {k.partition('core_model.')[2]: v for k,v in sd}
+encoder.core_model.output_past = False
+encoder.eval()
+
 encoder.load_state_dict(sd)
-encoder.to(device)
 encoder = encoder.to(DEVICE)
 
 """Let's take a look at what the encoder outputs."""
@@ -210,15 +226,15 @@ with torch.inference_mode():
       attention_mask=batch["attention_mask"][0],
   )
 
-for k, v in out.items():
-  print(k, tuple(v.shape))
+#for k, v in out.items():
+#  print(k, tuple(v.shape))
 
 predictions = []
 id2Score = defaultdict()
 
 # for batch_num, batch in tqdm(enumerate(val_dataloader), total=len(val_dataloader)):
 count = 0
-for batch in tqdm.tqdm(val_dataloader, desc="val"):
+for batch in tqdm.tqdm(val_dataloader, total=len(val_dataloader), disable=True):
     for input_ids, token_type_ids, attention_mask in zip(batch["input_ids"], batch["token_type_ids"], batch["attention_mask"]):
       input_ids = input_ids.to(DEVICE)
       token_type_ids = token_type_ids.to(DEVICE)
@@ -229,9 +245,10 @@ for batch in tqdm.tqdm(val_dataloader, desc="val"):
           attention_mask=attention_mask,
           # labels=batch["labels"]
           )
+
       if type(outputs) == tuple:
           outputs = outputs[0]
-      outputs = torch.softmax(outputs.logits, dim=1)
+      outputs = torch.softmax(outputs, dim=1)
 
       # print(outputs.shape)
       # print(i, dataset["validation"][count]["sentences"]["id"][i])
@@ -243,7 +260,7 @@ for batch in tqdm.tqdm(val_dataloader, desc="val"):
           probabilities['target'] = dataset["validation"][count]["target"]
           probabilities['context_id'] = dataset["validation"][count]["id"]
           probabilities['id'] = dataset["validation"][count]["sentences"]["id"][idx]
-          probabilities['score'] = outputs[idx, 0].item()
+          probabilities['score'] = outputs[idx, 1].item()
           id2Score[dataset["validation"][count]["sentences"]["id"][idx]] = outputs[idx, 0].item()
           predictions.append(probabilities)
       count += 1
